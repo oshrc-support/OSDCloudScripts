@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "name": "C/C++ Runner: Debug Session",
+        "type": "cppdbg",
+        "request": "launch",
+        "args": [],
+        "stopAtEntry": false,
+        "externalConsole": true,
+        "cwd": "c:/Repos/OSDCloudScripts/azosdscriptsfunc",
+        "program": "c:/Repos/OSDCloudScripts/azosdscriptsfunc/build/Debug/outDebug",
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ]
+    },
+    {
+        "name": "Attach to .NET Functions",
+        "type": "coreclr",
+        "request": "attach",
+        "processId": "${command:azureFunctions.pickProcess}"
+    }
+]
+}
