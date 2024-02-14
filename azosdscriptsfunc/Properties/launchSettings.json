@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "azosdscriptsfunc": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7187",
-      "launchBrowser": false
-    }
-  }
-}
