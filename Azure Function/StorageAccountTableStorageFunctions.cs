@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace StorageAccountExample
+namespace oshrcosdcloud_stor
 {
     internal class StorageAccountTableStorageFunctions
     {
@@ -26,6 +26,7 @@ namespace StorageAccountExample
         public async Task<IActionResult> BlobTriggerAsync([HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "table-get/{partition}/{id}")] HttpRequest req,
             [Table(TableName, "{partition}", "{id}")] TableEntity item)
         {
+            await Task.Delay(0); // Add an await statement here to make the method asynchronous.
             return new OkObjectResult(item);
         }
 

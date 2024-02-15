@@ -2,10 +2,10 @@
 param location string = 'eastus'
 
 @description('Name of the storage account')
-param storageAccountName string = 'oshrcosdcloud-stor'
+param storageAccountName string = 'oshrcosdcloud_stor'
 
 @description('Name of the function app')
-param functionAppName string = 'oshrcosdcloud-fa'
+param functionAppName string = 'oshrcosdcloud_fa'
 
 var managedIdentityName = '${functionAppName}-identity'
 var appInsightsName = '${functionAppName}-appinsights'
