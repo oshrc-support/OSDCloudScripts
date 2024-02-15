@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
-    <UserSecretsId>615805f2-2500-4398-84db-980853b253c2</UserSecretsId>
+    <UserSecretsId>bc45052b-b629-4a64-9c28-00fc559f9099</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.1.3" />
