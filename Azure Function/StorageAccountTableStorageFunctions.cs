@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace StorageAccountExample
+namespace oshrcosdcloud_stor
 {
     internal class StorageAccountTableStorageFunctions
     {

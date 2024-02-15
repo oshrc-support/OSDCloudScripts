@@ -9,7 +9,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace StorageAccountExample
+namespace oshrcosdcloud_stor
 {
     public class StorageAccountBlobFunctions
     {

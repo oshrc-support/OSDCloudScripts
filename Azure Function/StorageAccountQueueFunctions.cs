@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace StorageAccountExample
+namespace oshrcosdcloud_stor
 {
     public class StorageAccountQueueFunctions
     {
