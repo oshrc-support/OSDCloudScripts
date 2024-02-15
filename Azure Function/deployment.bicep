@@ -1,26 +1,11 @@
-// Define parameters
 param location string = 'eastus'
-param storageAccountName string = 'oshrcosdcloud_stor'
-param functionAppName string = 'oshrcosdcloud_fa'
-param environment object
+param storageAccountName string = 'oshrcosdcloudstor'
+param functionAppName string = 'oshrcosdcloudfa'
 
-// Generate unique names for resources
 var managedIdentityName = '${functionAppName}-identity'
 var appInsightsName = '${functionAppName}-appinsights'
 var appServicePlanName = '${functionAppName}-appserviceplan'
 
-// Define service URIs
-var blobServiceUri = '${storageAccountName}.blob.${environment.suffixes.storage}'
-var queueServiceUri = '${storageAccountName}.queue.${environment.suffixes.storage}'
-var tableServiceUri = '${storageAccountName}.table.${environment.suffixes.storage}'
-
-// Define role definition resource IDs
-var storageOwnerRoleDefinitionResourceId = '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
-var storageQueueDataContributorRoleId = '/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88'
-var storageQueueDataQueueMessageSenderRoleId = '/providers/Microsoft.Authorization/roleDefinitions/c6a89b2d-59bc-44d0-9896-0f6e12d7b80a'
-var storageTableDataContributorRoleId = '/providers/Microsoft.Authorization/roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
-
-// Define resources
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: storageAccountName
   location: location
@@ -32,6 +17,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
     allowBlobPublicAccess: false
   }
 }
+
+output endpoint string = storageAccount.properties.primaryEndpoints.web
 
 resource storageQueuesService 'Microsoft.Storage/storageAccounts/queueServices@2021-09-01' = {
   name: 'default'
@@ -58,8 +45,13 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-
   location: location
 }
 
+var storageOwnerRoleDefinitionResourceId = '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+var storageQueueDataContributorRoleId = '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88'
+var storageQueueDataQueueMessageSenderRoleId = '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/c6a89b2d-59bc-44d0-9896-0f6e12d7b80a'
+var storageTableDataContributorRoleId = '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
+
 resource storageOwnerPermission 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(storageAccount.id, functionAppName, storageOwnerRoleDefinitionResourceId)
+  name: guid(storageAccount.id, functionAppName, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   scope: storageAccount
   properties: {
     principalId: managedIdentity.properties.principalId
@@ -68,29 +60,29 @@ resource storageOwnerPermission 'Microsoft.Authorization/roleAssignments@2020-10
 }
 
 resource storageQueueContributorPermission 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(storageAccount.id, functionAppName, storageQueueDataContributorRoleId)
+  name: guid(storageAccount.id, functionAppName, 'contributor')
   scope: storageAccount
   properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageQueueDataContributorRoleId) 
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageQueueDataContributorRoleId)
   }
 }
 
 resource storageQueueSenderPermission 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(storageAccount.id, functionAppName, storageQueueDataQueueMessageSenderRoleId)
+  name: guid(storageAccount.id, functionAppName, 'sender')
   scope: storageAccount
   properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageQueueDataQueueMessageSenderRoleId) 
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageQueueDataQueueMessageSenderRoleId)
   }
 }
 
 resource storageTableContributorPermission 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(storageAccount.id, functionAppName, storageTableDataContributorRoleId)
+  name: guid(storageAccount.id, functionAppName, 'contributor')
   scope: storageAccount
   properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId:subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributorRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributorRoleId)
   }
 }
 
@@ -126,7 +118,7 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment.suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=core.windows.net;AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -146,15 +138,15 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'blobConnection__serviceUri'
-          value: blobServiceUri
+          value: storageAccount.properties.primaryEndpoints.web
         }
         {
           name: 'blobConnection__queueServiceUri'
-          value: queueServiceUri
+          value: storageAccount.properties.primaryEndpoints.queue
         }
         {
           name: 'blobConnection__tableServiceUri'
-          value: tableServiceUri
+          value: storageAccount.properties.primaryEndpoints.table
         }
         {
           name: 'blobConnection__credential'
