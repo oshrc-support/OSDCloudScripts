@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Blob Storage Files</title>
+</head>
+<body>
+    <h1>Azure Blob Storage Files</h1>
+    <ul id="blobList"></ul>
+
+    <script src="https://unpkg.com/@azure/identity"></script>
+    <script src="https://unpkg.com/@azure/storage-blob"></script>
+    <script>
+        async function getBlobNames() {
+            // Retrieve the connection string from Azure Key Vault
+            const credential = new DefaultAzureCredential();
+            const vaultName = 'oshrcazosdprod';
+            const keyVaultUrl = `https://${vaultName}.vault.azure.net`;
+const secretName = 'oshrcazosd';
+            const secretClient = new SecretClient(keyVaultUrl, credential);
+
+            const connectionString = await secretClient.getSecret(secretName);
+
+            // Create BlobServiceClient using connection string
+            const blobServiceClient = new BlobServiceClient(connectionString.value);
+
+            // Get container client (assuming container name is 'your-container-name')
+            const containerClient = blobServiceClient.getContainerClient('azosdprodcloud');
+
+            // List blobs in the container
+            const blobList = [];
+            for await (const blob of containerClient.listBlobsFlat()) {
+                blobList.push(blob.name);
+            }
+
+            return blobList;
+        }
+
+        async function displayBlobNames() {
+            const blobList = await getBlobNames();
+            const blobListElement = document.getElementById('blobList');
+
+            blobList.forEach(blobName => {
+                const li = document.createElement('li');
+                li.textContent = blobName;
+                blobListElement.appendChild(li);
+            });
+        }
+
+        displayBlobNames();
+    </script>
+</body>
+</html>
